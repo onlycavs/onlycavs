@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cavalier King Charles Spaniel</title>
+
+    <style>
+        body {
+            margin: 0;
+            background: #f4f4f4;
+            font-family: Arial, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+
+        .container {
+            text-align: center;
+            background: white;
+            padding: 40px;
+            border-radius: 15px;
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+        }
+
+        .image-wrapper {
+            position: relative;
+            display: inline-block;
+            cursor: pointer;
+        }
+
+        img {
+            width: 300px;
+            image-rendering: pixelated;
+            image-rendering: crisp-edges;
+            display: block;
+            user-select: none;
+        }
+
+        .heart {
+            position: absolute;
+            top: -42px;
+            left: 50%;
+            --x: -50%;
+            --y: -50%;
+            width: 46px;
+            height: 46px;
+            transform: translate(var(--x), var(--y)) scale(0.4) rotate(0deg);
+            opacity: 0;
+            pointer-events: none;
+            filter: drop-shadow(0 4px 6px rgba(255, 77, 109, 0.35));
+        }
+
+        .heart.show {
+            animation: heartBurst 1s ease-out forwards;
+        }
+
+        .heart path {
+            fill: #ff4d6d;
+            stroke: #ffffff;
+            stroke-width: 1.2;
+            stroke-linejoin: round;
+            stroke-linecap: round;
+            shape-rendering: crispEdges;
+        }
+
+        @keyframes heartBurst {
+            0% {
+                opacity: 0;
+                transform: translate(var(--x), var(--y)) scale(0.4) rotate(0deg);
+            }
+
+            20% {
+                opacity: 1;
+                transform: translate(var(--x), var(--y)) scale(1) rotate(-12deg);
+            }
+
+            60% {
+                opacity: 1;
+                transform: translate(var(--x), var(--y)) scale(1.05) rotate(12deg);
+            }
+
+            100% {
+                opacity: 0;
+                transform: translate(var(--x), var(--y)) scale(1.25) rotate(24deg);
+            }
+        }
+
+        h1 {
+            margin-top: 20px;
+            color: #333;
+        }
+
+        p {
+            color: #666;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="container">
+        <div class="image-wrapper">
+            <img src="ckcs_sad.png" alt="Pixel Art Cavalier King Charles Spaniel">
+            <svg class="heart" viewBox="0 0 24 24" aria-hidden="true">
+                <path d="M12 21s-7-4.35-7-10a4.5 4.5 0 0 1 7.5-3.5 4.5 4.5 0 0 1 7.5 3.5c0 5.65-7 10-7 10z" />
+            </svg>
+        </div>
+        <h1>Cavalier King Charles Spaniel</h1>
+        <p>Small Paws. Big Hearts.</p>
+    </div>
+
+    <script>
+        const imageWrapper = document.querySelector('.image-wrapper');
+        const dogImage = imageWrapper.querySelector('img');
+        const positions = [
+            { top: '-22px', left: '50%', x: '-50%', y: '-50%' },
+            { top: '-8px', left: '32%', x: '-50%', y: '-50%' },
+            { top: '-8px', left: '68%', x: '-50%', y: '-50%' }
+        ];
+        let lastPositionIndex = -1;
+        let happyTimer;
+
+        imageWrapper.addEventListener('click', () => {
+            clearTimeout(happyTimer);
+            dogImage.src = 'ckcs_happy.png';
+            dogImage.alt = 'Pixel Art Cavalier King Charles Spaniel happy';
+
+            let nextIndex = Math.floor(Math.random() * positions.length);
+
+            while (nextIndex === lastPositionIndex) {
+                nextIndex = Math.floor(Math.random() * positions.length);
+            }
+
+            const position = positions[nextIndex];
+            const heart = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+            heart.setAttribute('class', 'heart');
+            heart.setAttribute('viewBox', '0 0 24 24');
+            heart.setAttribute('aria-hidden', 'true');
+            heart.innerHTML = '<path d="M12 21s-7-4.35-7-10a4.5 4.5 0 0 1 7.5-3.5 4.5 4.5 0 0 1 7.5 3.5c0 5.65-7 10-7 10z" />';
+            heart.style.top = position.top;
+            heart.style.left = position.left;
+            heart.style.setProperty('--x', position.x);
+            heart.style.setProperty('--y', position.y);
+            imageWrapper.appendChild(heart);
+            lastPositionIndex = nextIndex;
+
+            requestAnimationFrame(() => {
+                heart.classList.add('show');
+            });
+
+            setTimeout(() => {
+                heart.remove();
+            }, 1000);
+
+            happyTimer = setTimeout(() => {
+                dogImage.src = 'ckcs_sad.png';
+                dogImage.alt = 'Pixel Art Cavalier King Charles Spaniel';
+            }, 3000);
+        });
+    </script>
+
+</body>
+
+</html>
