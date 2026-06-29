@@ -66,6 +66,63 @@
             shape-rendering: crispEdges;
         }
 
+        .stats-card {
+            margin: 20px auto 0;
+            max-width: 320px;
+            background: #fcfcfc;
+            border: 1px solid #ececec;
+            border-radius: 14px;
+            padding: 18px 20px;
+            text-align: left;
+            box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.9);
+        }
+
+        .stats-card h2 {
+            margin: 0 0 12px;
+            font-size: 0.95rem;
+            color: #444;
+            letter-spacing: 0.02em;
+            text-transform: uppercase;
+        }
+
+        .stats-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.95rem;
+        }
+
+        .stats-table td {
+            padding: 8px 6px;
+            vertical-align: middle;
+        }
+
+        .stats-table td:first-child {
+            color: #555;
+        }
+
+        .stat-value {
+            text-align: right;
+            font-weight: 700;
+            color: #111;
+            min-width: 44px;
+        }
+
+        .stat-meter {
+            width: 100%;
+            height: 10px;
+            border-radius: 999px;
+            background: #e6e6e6;
+            overflow: hidden;
+            margin-top: 6px;
+        }
+
+        .stat-meter-fill {
+            height: 100%;
+            border-radius: inherit;
+            background: linear-gradient(90deg, #ff7a8a, #ff4d6d);
+            transition: width 0.3s ease;
+        }
+
         @keyframes heartBurst {
             0% {
                 opacity: 0;
@@ -110,11 +167,52 @@
         </div>
         <h1>Cavalier King Charles Spaniel</h1>
         <p>Small Paws. Big Hearts.</p>
+
+        <div class="stats-card">
+            <h2>Stats</h2>
+            <table class="stats-table">
+                <tr>
+                    <td>Happiness <span aria-hidden="true">❤️</span></td>
+                    <td class="stat-value" id="happiness-value">5</td>
+                </tr>
+                <tr>
+                    <td colspan="2">
+                        <div class="stat-meter">
+                            <div class="stat-meter-fill" id="happiness-meter" style="width:50%;"></div>
+                        </div>
+                    </td>
+                </tr>
+                <tr>
+                    <td>Hunger <span aria-hidden="true">🍖</span></td>
+                    <td class="stat-value">5</td>
+                </tr>
+                <tr>
+                    <td colspan="2">
+                        <div class="stat-meter">
+                            <div class="stat-meter-fill" style="width:50%;"></div>
+                        </div>
+                    </td>
+                </tr>
+                <tr>
+                    <td>Energy <span aria-hidden="true">⚡</span></td>
+                    <td class="stat-value">5</td>
+                </tr>
+                <tr>
+                    <td colspan="2">
+                        <div class="stat-meter">
+                            <div class="stat-meter-fill" style="width:50%;"></div>
+                        </div>
+                    </td>
+                </tr>
+            </table>
+        </div>
     </div>
 
     <script>
         const imageWrapper = document.querySelector('.image-wrapper');
         const dogImage = imageWrapper.querySelector('img');
+        const happinessValue = document.getElementById('happiness-value');
+        const happinessMeter = document.getElementById('happiness-meter');
         const positions = [
             { top: '-22px', left: '50%', x: '-50%', y: '-50%' },
             { top: '-8px', left: '32%', x: '-50%', y: '-50%' },
@@ -122,11 +220,33 @@
         ];
         let lastPositionIndex = -1;
         let happyTimer;
+        let decayTimer;
+        let happiness = 5;
+
+        const updateHappinessDisplay = () => {
+            happinessValue.textContent = happiness;
+            happinessMeter.style.width = `${happiness * 10}%`;
+        };
+
+        const scheduleDecay = () => {
+            clearTimeout(decayTimer);
+            decayTimer = setTimeout(() => {
+                happiness = Math.max(0, happiness - 1);
+                updateHappinessDisplay();
+                scheduleDecay();
+            }, 10 * 60 * 1000);
+        };
+
+        updateHappinessDisplay();
+        scheduleDecay();
 
         imageWrapper.addEventListener('click', () => {
             clearTimeout(happyTimer);
             dogImage.src = 'ckcs_happy.png';
             dogImage.alt = 'Pixel Art Cavalier King Charles Spaniel happy';
+            happiness = Math.min(10, happiness + 1);
+            updateHappinessDisplay();
+            scheduleDecay();
 
             let nextIndex = Math.floor(Math.random() * positions.length);
 
@@ -158,7 +278,7 @@
             happyTimer = setTimeout(() => {
                 dogImage.src = 'ckcs_sad.png';
                 dogImage.alt = 'Pixel Art Cavalier King Charles Spaniel';
-            }, 3000);
+            }, 2000);
         });
     </script>
 
