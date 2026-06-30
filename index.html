@@ -41,29 +41,90 @@
 
         .heart {
             position: absolute;
-            top: -42px;
+            top: -60px;
             left: 50%;
             --x: -50%;
             --y: -50%;
-            width: 46px;
-            height: 46px;
-            transform: translate(var(--x), var(--y)) scale(0.4) rotate(0deg);
+            width: 3em;
+            height: 3em;
+            transform: translate(var(--x), var(--y)) scale(1) rotate(0deg);
             opacity: 0;
             pointer-events: none;
-            filter: drop-shadow(0 4px 6px rgba(255, 77, 109, 0.35));
+            filter: drop-shadow(0 6px 10px rgba(255, 77, 109, 0.35));
+            object-fit: contain;
         }
 
         .heart.show {
             animation: heartBurst 1s ease-out forwards;
         }
 
-        .heart path {
-            fill: #ff4d6d;
-            stroke: #ffffff;
-            stroke-width: 1.2;
-            stroke-linejoin: round;
-            stroke-linecap: round;
-            shape-rendering: crispEdges;
+        .stats-table td:first-child span[aria-hidden="true"],
+        .stat-heart-icon {
+            font-size: 32px;
+            line-height: 1;
+            vertical-align: middle;
+        }
+
+        .stat-heart-icon {
+            display: inline-block;
+            margin-left: 8px;
+        }
+
+        .stats-card {
+            margin: 20px auto 0;
+            max-width: 320px;
+            background: #fcfcfc;
+            border: 1px solid #ececec;
+            border-radius: 14px;
+            padding: 18px 20px;
+            text-align: left;
+            box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.9);
+        }
+
+        .stats-card h2 {
+            margin: 0 0 12px;
+            font-size: 0.95rem;
+            color: #444;
+            letter-spacing: 0.02em;
+            text-transform: uppercase;
+        }
+
+        .stats-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.95rem;
+        }
+
+        .stats-table td {
+            padding: 8px 6px;
+            vertical-align: middle;
+        }
+
+        .stats-table td:first-child {
+            color: #555;
+        }
+
+        .stat-value {
+            text-align: right;
+            font-weight: 700;
+            color: #111;
+            min-width: 44px;
+        }
+
+        .stat-meter {
+            width: 100%;
+            height: 10px;
+            border-radius: 999px;
+            background: #e6e6e6;
+            overflow: hidden;
+            margin-top: 6px;
+        }
+
+        .stat-meter-fill {
+            height: 100%;
+            border-radius: inherit;
+            background: linear-gradient(90deg, #ff7a8a, #ff4d6d);
+            transition: width 0.3s ease;
         }
 
         @keyframes heartBurst {
@@ -103,18 +164,56 @@
 
     <div class="container">
         <div class="image-wrapper">
-            <img src="ckcs_sad.png" alt="Pixel Art Cavalier King Charles Spaniel">
-            <svg class="heart" viewBox="0 0 24 24" aria-hidden="true">
-                <path d="M12 21s-7-4.35-7-10a4.5 4.5 0 0 1 7.5-3.5 4.5 4.5 0 0 1 7.5 3.5c0 5.65-7 10-7 10z" />
-            </svg>
+            <img src="assets/ckcs_sad.png" alt="Pixel Art Cavalier King Charles Spaniel">
+            <img class="heart" src="assets/heart_icon.png" alt="" aria-hidden="true">
         </div>
-        <h1>Cavalier King Charles Spaniel</h1>
         <p>Small Paws. Big Hearts.</p>
+
+        <div class="stats-card">
+            <h2>Stats</h2>
+            <table class="stats-table">
+                <tr>
+                    <td>Happiness <span class="stat-heart-icon" aria-hidden="true">❤️</span></td>
+                    <td class="stat-value" id="happiness-value">5</td>
+                </tr>
+                <tr>
+                    <td colspan="2">
+                        <div class="stat-meter">
+                            <div class="stat-meter-fill" id="happiness-meter" style="width:50%;"></div>
+                        </div>
+                    </td>
+                </tr>
+                <tr>
+                    <td>Hunger <span aria-hidden="true">🍖</span></td>
+                    <td class="stat-value">5</td>
+                </tr>
+                <tr>
+                    <td colspan="2">
+                        <div class="stat-meter">
+                            <div class="stat-meter-fill" style="width:50%;"></div>
+                        </div>
+                    </td>
+                </tr>
+                <tr>
+                    <td>Energy <span aria-hidden="true">⚡</span></td>
+                    <td class="stat-value">5</td>
+                </tr>
+                <tr>
+                    <td colspan="2">
+                        <div class="stat-meter">
+                            <div class="stat-meter-fill" style="width:50%;"></div>
+                        </div>
+                    </td>
+                </tr>
+            </table>
+        </div>
     </div>
 
     <script>
         const imageWrapper = document.querySelector('.image-wrapper');
         const dogImage = imageWrapper.querySelector('img');
+        const happinessValue = document.getElementById('happiness-value');
+        const happinessMeter = document.getElementById('happiness-meter');
         const positions = [
             { top: '-22px', left: '50%', x: '-50%', y: '-50%' },
             { top: '-8px', left: '32%', x: '-50%', y: '-50%' },
@@ -122,11 +221,39 @@
         ];
         let lastPositionIndex = -1;
         let happyTimer;
+        let decayTimer;
+        let happiness = 5;
+
+        const setDogImage = (isHappy) => {
+            dogImage.src = isHappy ? 'assets/ckcs_happy.png' : 'assets/ckcs_sad.png';
+            dogImage.alt = isHappy ? 'Pixel Art Cavalier King Charles Spaniel happy' : 'Pixel Art Cavalier King Charles Spaniel';
+        };
+
+        const updateHappinessDisplay = () => {
+            happinessValue.textContent = happiness;
+            happinessMeter.style.width = `${happiness * 10}%`;
+        };
+
+        const scheduleDecay = () => {
+            clearTimeout(decayTimer);
+            decayTimer = setTimeout(() => {
+                happiness = Math.max(0, happiness - 1);
+                updateHappinessDisplay();
+                setDogImage(happiness >= 10);
+                scheduleDecay();
+            }, 10 * 60 * 1000);
+        };
+
+        updateHappinessDisplay();
+        setDogImage(false);
+        scheduleDecay();
 
         imageWrapper.addEventListener('click', () => {
             clearTimeout(happyTimer);
-            dogImage.src = 'ckcs_happy.png';
-            dogImage.alt = 'Pixel Art Cavalier King Charles Spaniel happy';
+            happiness = Math.min(10, happiness + 1);
+            updateHappinessDisplay();
+            setDogImage(true);
+            scheduleDecay();
 
             let nextIndex = Math.floor(Math.random() * positions.length);
 
@@ -135,11 +262,11 @@
             }
 
             const position = positions[nextIndex];
-            const heart = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+            const heart = document.createElement('img');
             heart.setAttribute('class', 'heart');
-            heart.setAttribute('viewBox', '0 0 24 24');
+            heart.setAttribute('src', 'assets/heart_icon.png');
+            heart.setAttribute('alt', '');
             heart.setAttribute('aria-hidden', 'true');
-            heart.innerHTML = '<path d="M12 21s-7-4.35-7-10a4.5 4.5 0 0 1 7.5-3.5 4.5 4.5 0 0 1 7.5 3.5c0 5.65-7 10-7 10z" />';
             heart.style.top = position.top;
             heart.style.left = position.left;
             heart.style.setProperty('--x', position.x);
@@ -155,10 +282,13 @@
                 heart.remove();
             }, 1000);
 
-            happyTimer = setTimeout(() => {
-                dogImage.src = 'ckcs_sad.png';
-                dogImage.alt = 'Pixel Art Cavalier King Charles Spaniel';
-            }, 3000);
+            if (happiness < 10) {
+                happyTimer = setTimeout(() => {
+                    if (happiness < 10) {
+                        setDogImage(false);
+                    }
+                }, 2000);
+            }
         });
     </script>
 
